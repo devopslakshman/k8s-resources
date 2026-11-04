@@ -1,3 +1,4 @@
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -21,7 +22,6 @@ kind: Deployment
 metadata:
   name: payment
   namespace: roboshop
-  # these labels are replicaset labels
   labels:
     project: roboshop
     tier: backend
@@ -29,12 +29,10 @@ metadata:
 spec:
   replicas: 1
   selector:
-    # using these labels replica set selects the pod
     matchLabels:
       project: roboshop
       tier: backend
       component: payment
-  # This is pod definition, pod is subset of replicaset
   template:
     metadata:
       labels:
@@ -45,29 +43,40 @@ spec:
       containers:
       - name: payment
         image: 484056256762.dkr.ecr.us-east-1.amazonaws.com/roboshop/payment:1.0
-        imagePullPolicy: Always # safe to pull everytime, there may be images with same version rebuilt and pushed
+        imagePullPolicy: Always
+
         resources:
           requests:
             cpu: "100m"
-            memory: "128Mi"
+            memory: "256Mi"
           limits:
-            cpu: "100m"
-            memory: "128Mi"
-        readinessProbe:
-          # httpGet:
-          #   path: /health
-          #   port: 8080
-          tcpSocket:
+            cpu: "500m"
+            memory: "256Mi"
+
+        startupProbe:
+          httpGet:
+            path: /health
             port: 8080
-          failureThreshold: 2
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 12
+
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          failureThreshold: 3
           periodSeconds: 10
-          initialDelaySeconds: 15
+          timeoutSeconds: 3
+
         livenessProbe:
           httpGet:
             path: /health
             port: 8080
-          failureThreshold: 2
+          failureThreshold: 3
           periodSeconds: 10
+          timeoutSeconds: 5
+
         envFrom:
         - configMapRef:
             name: payment
@@ -83,11 +92,10 @@ metadata:
     component: payment
 spec:
   selector:
-    # labels are used as selectors
     project: roboshop
     tier: backend
     component: payment
   ports:
   - protocol: TCP
-    port: 8080 # servie port
-    targetPort: 8080 # container port
+    port: 8080
+    targetPort: 8080
