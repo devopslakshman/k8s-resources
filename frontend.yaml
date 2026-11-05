@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: ConfigMap
-metadata: 
+metadata:
   name: frontend
   namespace: roboshop
   labels:
     project: roboshop
     tier: frontend
     component: frontend
-data: 
+data:
   nginx.conf: |
     user nginx;
     worker_processes auto;
@@ -77,6 +77,7 @@ kind: Deployment
 metadata:
   name: frontend
   namespace: roboshop
+  # these labels are replicaset labels
   labels:
     project: roboshop
     tier: frontend
@@ -84,10 +85,12 @@ metadata:
 spec:
   replicas: 1
   selector:
+    # using these labels replica set selects the pod
     matchLabels:
       project: roboshop
       tier: frontend
       component: frontend
+  # This is pod definition, pod is subset of replicaset
   template:
     metadata:
       labels:
@@ -101,8 +104,15 @@ spec:
           name: frontend
       containers:
       - name: frontend
-        image: 484056256762.dkr.ecr.us-east-1.amazonaws.com/roboshop/frontend:1.4
-        imagePullPolicy: Always
+        image: joindevops/frontend:1.4.0
+        imagePullPolicy: Always # safe to pull everytime, there may be images with same version rebuilt and pushed
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "100m"
+            memory: "128Mi"
         readinessProbe:
           # httpGet:
           #   path: /health
@@ -120,19 +130,11 @@ spec:
           periodSeconds: 10
         volumeMounts:
         - name: nginx-config
+          # by default it mounts and thinks as directory
           mountPath: "/etc/nginx/nginx.conf"
           subPath: nginx.conf
-          readOnly: true  
-        resources:
-          requests:
-            cpu: "128m"
-            memory: "256Mi"
-          limits:
-            cpu: "256m"
-            memory: "512Mi"
-
+          readOnly: true
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -145,10 +147,11 @@ metadata:
 spec:
   type: LoadBalancer
   selector:
+    # labels are used as selectors
     project: roboshop
     tier: frontend
     component: frontend
   ports:
   - protocol: TCP
-    port: 80
-    targetPort: 80
+    port: 80 # servie port
+    targetPort: 80 # container port
