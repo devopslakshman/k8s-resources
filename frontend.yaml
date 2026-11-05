@@ -104,15 +104,15 @@ spec:
           name: frontend
       containers:
       - name: frontend
-        image: joindevops/frontend:1.4.0
+        image: 484056256762.dkr.ecr.us-east-1.amazonaws.com/roboshop/frontend:1.0
         imagePullPolicy: Always # safe to pull everytime, there may be images with same version rebuilt and pushed
         resources:
           requests:
             cpu: "100m"
             memory: "128Mi"
           limits:
-            cpu: "100m"
-            memory: "128Mi"
+            cpu: "200m"
+            memory: "300Mi"
         readinessProbe:
           # httpGet:
           #   path: /health
