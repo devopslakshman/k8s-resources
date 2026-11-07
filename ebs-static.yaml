@@ -1,12 +1,14 @@
+
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: ebs
 spec:
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   capacity:
     storage: 5Gi
+  persistentVolumeReclaimPolicy: Retain
   csi:
     driver: ebs.csi.aws.com
     fsType: ext4
@@ -16,11 +18,12 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: ebs
+  namespace: roboshop
 spec:
-  storageClassName: "" # Empty string must be explicitly set otherwise default StorageClass will be set
+  storageClassName: ""
   volumeName: ebs
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 5Gi  
+      storage: 5Gi
