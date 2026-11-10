@@ -1,4 +1,3 @@
-
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -18,6 +17,7 @@ kind: Deployment
 metadata:
   name: user
   namespace: roboshop
+  # these labels are replicaset labels
   labels:
     project: roboshop
     tier: backend
@@ -25,10 +25,12 @@ metadata:
 spec:
   replicas: 1
   selector:
+    # using these labels replica set selects the pod
     matchLabels:
       project: roboshop
       tier: backend
       component: user
+  # This is pod definition, pod is subset of replicaset
   template:
     metadata:
       labels:
@@ -39,7 +41,7 @@ spec:
       containers:
       - name: user
         image: 484056256762.dkr.ecr.us-east-1.amazonaws.com/roboshop/user:1.0
-        imagePullPolicy: Always
+        imagePullPolicy: Always # safe to pull everytime, there may be images with same version rebuilt and pushed
         resources:
           requests:
             cpu: "100m"
@@ -48,6 +50,9 @@ spec:
             cpu: "100m"
             memory: "128Mi"
         readinessProbe:
+          # httpGet:
+          #   path: /health
+          #   port: 8080
           tcpSocket:
             port: 8080
           failureThreshold: 2
@@ -62,13 +67,6 @@ spec:
         envFrom:
         - configMapRef:
             name: user
-        volumeMounts:
-        - name: user-storage
-          mountPath: /data
-      volumes:
-      - name: user-storage
-        persistentVolumeClaim:
-          claimName: ebs
 ---
 apiVersion: v1
 kind: Service
@@ -81,10 +79,11 @@ metadata:
     component: user
 spec:
   selector:
+    # labels are used as selectors
     project: roboshop
     tier: backend
     component: user
   ports:
   - protocol: TCP
-    port: 8080
-    targetPort: 8080
+    port: 8080 # servie port
+    targetPort: 8080 # container port
