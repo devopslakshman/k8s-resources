@@ -104,7 +104,7 @@ spec:
           name: frontend
       containers:
       - name: frontend
-        image: 484056256762.dkr.ecr.us-east-1.amazonaws.com/roboshop/frontend:1.0
+        image: 346882411601.dkr.ecr.us-east-1.amazonaws.com/roboshop/frontend:1.0
         imagePullPolicy: Always # safe to pull everytime, there may be images with same version rebuilt and pushed
         resources:
           requests:
