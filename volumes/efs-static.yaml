@@ -26,6 +26,7 @@ spec:
     requests:
       storage: 5Gi
 ---
+
 apiVersion: v1
 kind: Pod
 metadata:
@@ -37,8 +38,8 @@ spec:
     volumeMounts:
     - name: html-data
       mountPath: /usr/share/nginx/html
-  nodeSelector:
-    topology.kubernetes.io/zone:
+      subPath: app
+
   volumes:
   - name: html-data
     persistentVolumeClaim:
